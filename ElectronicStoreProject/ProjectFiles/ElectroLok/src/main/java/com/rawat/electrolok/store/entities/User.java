@@ -17,8 +17,9 @@ public class User {
     private String userId;
     @Column(name = "user_name")
     private String name;
+    @Column
+    private String gender;
     @Column(name = "user_email",unique = true)
-    private String Gender;
     private String email;
     @Column(name = "user_password",length = 10)
     private String password;

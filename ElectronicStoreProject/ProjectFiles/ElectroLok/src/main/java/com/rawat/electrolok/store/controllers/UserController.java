@@ -1,7 +1,9 @@
 package com.rawat.electrolok.store.controllers;
 
+import com.rawat.electrolok.store.dtos.ApiResponseMessage;
 import com.rawat.electrolok.store.dtos.UserDto;
 import com.rawat.electrolok.store.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,7 +21,7 @@ public class UserController {
 
     // save
         @PostMapping
-        public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
+        public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto){
             UserDto userDto1 = userService.createUser(userDto);
             return new ResponseEntity<>(userDto1, HttpStatus.CREATED);
         }
@@ -27,18 +29,22 @@ public class UserController {
     // Update user
         @PutMapping("/{userId}")
         public ResponseEntity<UserDto> updateUser(
-                @PathVariable("userID") String userId,
-                @RequestBody UserDto userDto
+                @PathVariable("userId") String userId,
+               @Valid @RequestBody UserDto userDto
         ){
             UserDto updatedUserDto = userService.updateUser(userDto, userId);
             return new ResponseEntity<>(updatedUserDto, HttpStatus.OK);
         }
 
     // Delete User by ID
-        @DeleteMapping("{/userId}")
-        public ResponseEntity<String> deleteUser(@PathVariable String userId){
+        @DeleteMapping("/{userId}")
+        public ResponseEntity<ApiResponseMessage> deleteUser(@PathVariable String userId){
             userService.deleteUser(userId);
-            return new ResponseEntity<>("User is Deleted Successfully.",HttpStatus.OK);
+            ApiResponseMessage userIsDeletedSuccessfullyMessage = ApiResponseMessage.builder()
+                    .message("User is Deleted Successfully")
+                    .success(true).httpStatus(HttpStatus.OK)
+                    .build();
+            return new ResponseEntity<>(userIsDeletedSuccessfullyMessage,HttpStatus.OK);
         }
 
     // get All User
@@ -46,8 +52,6 @@ public class UserController {
     public ResponseEntity<List<UserDto>> getAllUsers(){
             return new ResponseEntity<>(userService.getAllUsers(),HttpStatus.OK);
     }
-
-
     // get Single User
 
         @GetMapping("/{userId}")
