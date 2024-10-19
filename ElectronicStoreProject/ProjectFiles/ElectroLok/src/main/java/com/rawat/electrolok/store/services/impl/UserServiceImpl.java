@@ -2,6 +2,7 @@ package com.rawat.electrolok.store.services.impl;
 
 import com.rawat.electrolok.store.dtos.UserDto;
 import com.rawat.electrolok.store.entities.User;
+import com.rawat.electrolok.store.exceptions.ResourceNotFoundException;
 import com.rawat.electrolok.store.repositories.UserRepository;
 import com.rawat.electrolok.store.services.UserService;
 import org.modelmapper.ModelMapper;
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto userDto, String userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User ID not Found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User ID not Found"));
         user.setName(userDto.getName());
         user.setAbout(userDto.getAbout());
         user.setGender(userDto.getGender());
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User ID not Found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User ID not Found"));
         userRepository.delete(user);
     }
 
@@ -68,14 +69,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("ID not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("ID not found"));
         UserDto singleUserDto = entityToDto(user);
         return singleUserDto;
     }
 
     @Override
     public UserDto getUserByEmail(String email) {
-        User Email = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email not Found"));
+        User Email = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Email not Found"));
        return entityToDto(Email);
     }
 

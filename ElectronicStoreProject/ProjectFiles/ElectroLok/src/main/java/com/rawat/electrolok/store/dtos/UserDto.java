@@ -1,6 +1,7 @@
 package com.rawat.electrolok.store.dtos;
 
 
+import com.rawat.electrolok.store.Validate.ImageNameValid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -28,6 +29,7 @@ public class UserDto {
     private String password;
     @NotBlank(message = "About can't be Blank")
     private String about;
+    @ImageNameValid
     private String imageName;
 
     // @Pattern
