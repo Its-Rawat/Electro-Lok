@@ -1,6 +1,8 @@
 package com.rawat.electrolok.store.services;
 
+import com.rawat.electrolok.store.dtos.PageableResponse;
 import com.rawat.electrolok.store.dtos.UserDto;
+import com.rawat.electrolok.store.entities.User;
 
 import java.util.List;
 
@@ -15,7 +17,7 @@ public interface UserService {
     void deleteUser(String userId);
 
     // getAllUser
-    List<UserDto> getAllUsers();
+    PageableResponse<UserDto> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDir);
 
     // getSingleUserById
     UserDto getUserById(String userId);

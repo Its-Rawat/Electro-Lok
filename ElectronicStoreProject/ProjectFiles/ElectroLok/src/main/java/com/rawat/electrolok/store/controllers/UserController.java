@@ -1,6 +1,7 @@
 package com.rawat.electrolok.store.controllers;
 
 import com.rawat.electrolok.store.dtos.ApiResponseMessage;
+import com.rawat.electrolok.store.dtos.PageableResponse;
 import com.rawat.electrolok.store.dtos.UserDto;
 import com.rawat.electrolok.store.services.UserService;
 import jakarta.validation.Valid;
@@ -49,8 +50,13 @@ public class UserController {
 
     // get All User
     @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers(){
-            return new ResponseEntity<>(userService.getAllUsers(),HttpStatus.OK);
+    public ResponseEntity<PageableResponse<UserDto>> getAllUsers(
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(value = "pageSize",defaultValue = "10",required = false) int pageSize,
+            @RequestParam(value = "sortBy",defaultValue = "name",required = false) String sortBy,
+            @RequestParam(value = "sortDir",defaultValue = "asc",required = false) String sortDir
+            ){
+            return new ResponseEntity<>(userService.getAllUsers(pageNumber,pageSize, sortBy,sortDir),HttpStatus.OK);
     }
     // get Single User
 

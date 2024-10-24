@@ -1,5 +1,7 @@
 package com.rawat.electrolok.store.services.impl;
 
+import com.rawat.electrolok.store.Helper.helper;
+import com.rawat.electrolok.store.dtos.PageableResponse;
 import com.rawat.electrolok.store.dtos.UserDto;
 import com.rawat.electrolok.store.entities.User;
 import com.rawat.electrolok.store.exceptions.ResourceNotFoundException;
@@ -7,6 +9,10 @@ import com.rawat.electrolok.store.repositories.UserRepository;
 import com.rawat.electrolok.store.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,10 +67,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        List<UserDto> dtoList = users.stream().map(user -> entityToDto(user)).collect(Collectors.toList());
-        return dtoList;
+    public PageableResponse<UserDto> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDir) {
+
+        Sort sort = (sortDir.equalsIgnoreCase("desc")) ? (Sort.by(sortBy).descending()):(Sort.by(sortBy).ascending());
+
+        // pageNumber default starts from 0
+        Pageable pageable = PageRequest.of(pageNumber,pageSize, sort);
+
+        Page<User> page = userRepository.findAll(pageable);
+
+        PageableResponse<UserDto> pageableResponse = helper.getPageableResponse(page, UserDto.class);
+        return pageableResponse;
     }
 
     @Override
