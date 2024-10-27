@@ -4,6 +4,7 @@ import com.rawat.electrolok.store.exceptions.BadApiRequest;
 import com.rawat.electrolok.store.services.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -11,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-
+@Service
 public class FileServiceImpl implements FileService {
 
     private Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
@@ -19,15 +20,16 @@ public class FileServiceImpl implements FileService {
     @Override
     public String uploadFile(MultipartFile file, String path) throws IOException {
         String originalFilename = file.getOriginalFilename();
-        logger.info("FileName: {} ",originalFilename);
-        String randomUniqueFileName = UUID.randomUUID().toString();
+        String fileName = UUID.randomUUID().toString();
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String fileNameWithExtension = randomUniqueFileName + extension;
-        String fullPathWithFileName = path + File.separator + fileNameWithExtension;
+        String fileNameWithExtension = fileName + extension;
+        String fullPathWithFileName = path + fileNameWithExtension;
 
-        if(extension.equalsIgnoreCase(".png") || extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".jpeg") || extension.equalsIgnoreCase(".gif")){
+        logger.info("Full Image path {}",fullPathWithFileName);
+        if(extension.equalsIgnoreCase(".png") || extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".jpeg")){
 
             // Save File
+            logger.info("File Extension is: {}",extension);
             File folder = new File(path);
             if(!folder.exists()){
                 // create a folder
@@ -49,7 +51,6 @@ public class FileServiceImpl implements FileService {
         String fullPath = path+File.separator+ name;
         // reads data from file
         InputStream inputStream = new FileInputStream(fullPath);
-
         return inputStream;
     }
 }

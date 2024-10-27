@@ -3,6 +3,7 @@ package com.rawat.electrolok.store.services;
 import com.rawat.electrolok.store.dtos.PageableResponse;
 import com.rawat.electrolok.store.dtos.UserDto;
 import com.rawat.electrolok.store.entities.User;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 

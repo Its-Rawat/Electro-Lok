@@ -1,24 +1,40 @@
 package com.rawat.electrolok.store.controllers;
 
 import com.rawat.electrolok.store.dtos.ApiResponseMessage;
+import com.rawat.electrolok.store.dtos.ImageResponse;
 import com.rawat.electrolok.store.dtos.PageableResponse;
 import com.rawat.electrolok.store.dtos.UserDto;
+import com.rawat.electrolok.store.services.FileService;
 import com.rawat.electrolok.store.services.UserService;
+import com.rawat.electrolok.store.services.impl.FileServiceImpl;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
+//    Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FileService fileService;
+
+    @Value("${user.profile.image.path}")
+    private String imageUploadPath;
 
     // save
         @PostMapping
@@ -75,6 +91,23 @@ public class UserController {
     public ResponseEntity<List<UserDto>> searchUser(@PathVariable String keywords){
         return new ResponseEntity<>(userService.searchUser(keywords),HttpStatus.OK);
     }
+
+    // Upload User Image
+    @PostMapping("/image/{userId}")
+    public ResponseEntity<ImageResponse> uploadUserImage(@RequestParam("userImage")MultipartFile image, @PathVariable String userId) throws IOException {
+        String imageName = fileService.uploadFile(image, imageUploadPath);
+
+        UserDto user = userService.getUserById(userId);
+        user.setImageName(imageName);
+        UserDto userDto = userService.updateUser(user, userId);
+//        logger.info("User Image Uploaded {}", userDto.toString());
+
+        ImageResponse imageResponse = ImageResponse.builder().imageName(imageName).success(true).httpStatus(HttpStatus.CREATED).build();
+        return new ResponseEntity<>(imageResponse,HttpStatus.CREATED);
+    }
+
+    // Serve User Image
+
 
 
 }
