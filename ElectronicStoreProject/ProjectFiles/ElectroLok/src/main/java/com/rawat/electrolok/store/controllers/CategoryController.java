@@ -17,6 +17,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -44,7 +45,7 @@ public class CategoryController {
         return new ResponseEntity<>(categoryDtoCreated,HttpStatus.CREATED);
     }
     // update
-    @PostMapping("{categoryId}")
+    @PostMapping("/{categoryId}")
     public ResponseEntity<CategoryDto> updateCategory(
             @RequestBody CategoryDto categoryDto,
             @PathVariable String categoryId){
@@ -52,10 +53,23 @@ public class CategoryController {
         return new ResponseEntity<>(updatedCategory,HttpStatus.OK);
     }
     // delete
-    @DeleteMapping("{categoryId}")
+    @DeleteMapping("/{categoryId}")
     public ResponseEntity<ApiResponseMessage> deleteCategory(@PathVariable String categoryId){
+
+        CategoryDto category = categoryService.getCategory(categoryId);
+        String imagePath = category.getCoverImage(); // Assuming this is the file path
+        File imageFile = new File(imagePath);
+        if (imageFile.exists()){
+            imageFile.delete();
+            imageFile.deleteOnExit();
+            logger.info("Image {} deleted successfully.", imagePath);
+        } else {
+            logger.warn("Failed to delete image or image does not exist: {}", imagePath);
+        }
+
         categoryService.delete(categoryId);
         ApiResponseMessage deleteResponse = ApiResponseMessage.builder().message("Category with ID: " + categoryId + " Deleted Succesfully.").httpStatus(HttpStatus.OK).success(true).build();
+
         return new ResponseEntity<>(deleteResponse,HttpStatus.OK);
     }
 
@@ -96,13 +110,12 @@ public class CategoryController {
 
     // Serve Category Image
     @GetMapping("/image/{categoryId}")
-    public void serveCategoryImage(@PathVariable String categoryId, HttpServletResponse response)throws Exception{
+    public void serveCategoryImage(@PathVariable String categoryId, HttpServletResponse response)throws Exception {
         CategoryDto category = categoryService.getCategory(categoryId);
-        logger.info("Category Image Name: {}",category.getCoverImage());
+        logger.info("Category Image Name: {}", category.getCoverImage());
         InputStream resource = fileService.getResource(categoryImageUploadPath, category.getCoverImage());
         response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        StreamUtils.copy(resource,response.getOutputStream());
+        StreamUtils.copy(resource, response.getOutputStream());
     }
-
 
 }
