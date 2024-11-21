@@ -7,6 +7,7 @@ import com.rawat.electrolok.store.dtos.UserDto;
 import com.rawat.electrolok.store.services.FileService;
 import com.rawat.electrolok.store.services.UserService;
 import com.rawat.electrolok.store.services.impl.FileServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,18 +15,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-//    Logger logger = LoggerFactory.getLogger(UserController.class);
+    Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -55,7 +59,7 @@ public class UserController {
 
     // Delete User by ID
         @DeleteMapping("/{userId}")
-        public ResponseEntity<ApiResponseMessage> deleteUser(@PathVariable String userId){
+        public ResponseEntity<ApiResponseMessage> deleteUser(@PathVariable String userId) throws IOException {
             userService.deleteUser(userId);
             ApiResponseMessage userIsDeletedSuccessfullyMessage = ApiResponseMessage.builder()
                     .message("User is Deleted Successfully")
@@ -68,7 +72,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<PageableResponse<UserDto>> getAllUsers(
             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-            @RequestParam(value = "pageSize",defaultValue = "10",required = false) int pageSize,
+            @RequestParam(value = "pageSize",defaultValue = "2",required = false) int pageSize,
             @RequestParam(value = "sortBy",defaultValue = "name",required = false) String sortBy,
             @RequestParam(value = "sortDir",defaultValue = "asc",required = false) String sortDir
             ){
@@ -102,12 +106,21 @@ public class UserController {
         UserDto userDto = userService.updateUser(user, userId);
 //        logger.info("User Image Uploaded {}", userDto.toString());
 
-        ImageResponse imageResponse = ImageResponse.builder().imageName(imageName).success(true).httpStatus(HttpStatus.CREATED).build();
+        ImageResponse imageResponse = ImageResponse.builder().imageName(imageName).success(true).httpStatus(HttpStatus.CREATED).message("This is a Image").build();
         return new ResponseEntity<>(imageResponse,HttpStatus.CREATED);
     }
 
     // Serve User Image
 
+    @GetMapping("/image/{userId}")
+    public void serveUserImage(@PathVariable String userId, HttpServletResponse response) throws IOException {
+        UserDto user = userService.getUserById(userId);
+        logger.info("User Image Name: {}",user.getImageName());
+        InputStream resource = fileService.getResource(imageUploadPath, user.getImageName());
+        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+
+        StreamUtils.copy(resource,response.getOutputStream());
+    }
 
 
 }
