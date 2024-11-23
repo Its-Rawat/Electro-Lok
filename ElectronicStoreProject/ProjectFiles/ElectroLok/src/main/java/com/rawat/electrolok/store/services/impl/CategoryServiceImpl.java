@@ -12,12 +12,16 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
@@ -34,6 +38,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${category.profile.image.path}")
+    private String imagePath;
 
     @Override
     public CategoryDto create(CategoryDto categoryDto) {
@@ -63,6 +69,13 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(String categoryId) {
         Category categoryToDelete = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category Not Found!!"));
         categoryRepository.delete(categoryToDelete);
+        try{
+            String pathToImage = imagePath + categoryToDelete.getCoverImage();
+            Path path = Paths.get(pathToImage);
+            Files.delete(path);
+        }catch(Exception eeeee){
+                logger.info("Category Image not Found at this Location {}",imagePath+categoryToDelete.getCoverImage());
+        };
         logger.info("Deleted Category : {}", categoryId);
     }
     // Get Single Category

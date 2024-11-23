@@ -59,13 +59,17 @@ public class CategoryController {
         CategoryDto category = categoryService.getCategory(categoryId);
         String imagePath = category.getCoverImage(); // Assuming this is the file path
         File imageFile = new File(imagePath);
-        if (imageFile.exists()){
-            imageFile.delete();
+        if (imageFile.exists()) {
+            if (imageFile.delete()) {
+                logger.info("Image {} deleted successfully.", imagePath);
+            } else {
+                logger.warn("Failed to delete image: {}", imagePath);
+            }
             imageFile.deleteOnExit();
-            logger.info("Image {} deleted successfully.", imagePath);
         } else {
-            logger.warn("Failed to delete image or image does not exist: {}", imagePath);
+            logger.warn("Image does not exist: {}", imagePath);
         }
+
 
         categoryService.delete(categoryId);
         ApiResponseMessage deleteResponse = ApiResponseMessage.builder().message("Category with ID: " + categoryId + " Deleted Succesfully.").httpStatus(HttpStatus.OK).success(true).build();
